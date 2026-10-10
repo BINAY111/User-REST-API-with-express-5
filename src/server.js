@@ -1,7 +1,9 @@
 import { createApp } from "./app.js";
 import { config } from "./config/env.js";
+import { createContainer } from "./container.js";
 
-const app = createApp();
+const container = createContainer();
+const app = createApp(container);
 
 const server = app.listen(config.port, config.host, () => {
   console.log(
@@ -9,7 +11,6 @@ const server = app.listen(config.port, config.host, () => {
   );
 });
 
-// Graceful shutdown: stop accepting new connections, finish in-flight requests, then exit.
 function shutdown(signal) {
   console.log(`${signal} received — shutting down`);
   server.close(() => process.exit(0));
@@ -18,4 +19,3 @@ function shutdown(signal) {
 }
 process.on("SIGTERM", shutdown);
 process.on("SIGINT", shutdown);
-

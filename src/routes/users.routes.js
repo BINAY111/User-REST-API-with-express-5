@@ -1,21 +1,26 @@
 import { Router } from "express";
-import { UsersController } from "../controllers/users.controller.js";
 import { validateBody } from "../middleware/validate-body.js";
+import { validateIdParam } from "../middleware/validate-id.js";
 import {
   createUserSchema,
   updateUserSchema,
 } from "../validators/user.schema.js";
 
-const controller = new UsersController();
+// A factory: the router is built around whatever controller it is given.
+export function createUsersRouter(controller) {
+  const router = Router();
 
-export const usersRouter = Router();
+  router.param("id", validateIdParam); // every '/:id' route gets UUID validation
 
-usersRouter.get("/", controller.list);
-usersRouter.get("/:id", controller.getById);
-usersRouter.post("/", validateBody(createUserSchema), controller.create);
-usersRouter.patch(
-  "/:id",
-  validateBody(updateUserSchema, { partial: true }),
-  controller.update,
-);
-usersRouter.delete("/:id", controller.remove);
+  router.get("/", controller.list);
+  router.get("/:id", controller.getById);
+  router.post("/", validateBody(createUserSchema), controller.create);
+  router.patch(
+    "/:id",
+    validateBody(updateUserSchema, { partial: true }),
+    controller.update,
+  );
+  router.delete("/:id", controller.remove);
+
+  return router;
+}

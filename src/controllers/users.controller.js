@@ -25,6 +25,13 @@ export class UsersController {
     res.json({ data: await this.usersService.update(req.params.id, req.body) });
   };
 
+  // Admin only (RBAC): PATCH /users/:id/role  { "role": "admin" }
+  changeRole = async (req, res) => {
+    res.json({
+      data: await this.usersService.changeRole(req.params.id, req.body.role),
+    });
+  };
+
   remove = async (req, res) => {
     await this.usersService.remove(req.params.id);
     res.status(204).end();

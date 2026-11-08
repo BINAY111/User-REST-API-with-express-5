@@ -12,6 +12,7 @@ const withDefaults = (profile) => ({
   dateOfBirth: profile.dateOfBirth ?? null,
   address: profile.address ?? null,
   githubId: profile.githubId ?? null,
+  avatar: profile.avatar ?? null,
 });
 
 // The ONLY way a user leaves this service: without the password hash.
@@ -61,6 +62,7 @@ export class UsersService {
 
   // `role` is a second argument, NOT part of the request body — only trusted code (seed, admin tools) sets it.
   async create(data, { role = "customer" } = {}) {
+    
     await this.#assertEmailAvailable(data.email);
     const { password, ...profile } = data;
     const passwordHash = await this.hash(password);
@@ -133,9 +135,15 @@ export class UsersService {
     return toPublicUser(user);
   }
 
+    async setAvatar(id, avatar) {
+    await this.getById(id);
+    return toPublicUser(await this.users.update(id, { avatar }));
+  }
+
   async #assertEmailAvailable(email, exceptId) {
     const existing = await this.users.findByEmail(email);
     if (existing && existing.id !== exceptId)
       throw conflict(`Email ${email} is already registered`);
   }
 }
+

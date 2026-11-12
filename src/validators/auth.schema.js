@@ -1,16 +1,25 @@
+import { z } from "zod";
 import { ROLES } from "../services/users.service.js";
-import { email, lowercase, oneOf, password, string } from "./rules.js";
+import { email, password } from "./user.schema.js";
 
-export const loginSchema = {
-  email: { required: true, check: email(), transform: lowercase },
-  password: { required: true, check: string({ max: 72 }) }, // no strength rules on login — just "is it a string"
-};
+// Login validation
+export const loginSchema = z.strictObject({
+  email,
+  // Login only checks that password is a string.
+  // It does not apply registration password-strength rules.
+  password: z.string().max(72),
+});
 
-export const changePasswordSchema = {
-  currentPassword: { required: true, check: string({ max: 72 }) },
-  newPassword: { required: true, check: password() },
-};
+// Change password validation
+export const changePasswordSchema = z.strictObject({
+  currentPassword: z.string().max(72),
+  newPassword: password,
+});
 
-export const changeRoleSchema = {
-  role: { required: true, check: oneOf(ROLES) },
-};
+// Change user role validation
+export const changeRoleSchema = z.strictObject({
+  role: z.string().refine(
+    (value) => ROLES.includes(value),
+    "must be a valid role"
+  ),
+});
